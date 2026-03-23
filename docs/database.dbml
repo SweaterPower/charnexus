@@ -1,0 +1,89 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdaccessrightsiagram.io/docs
+
+Table users {
+  id integer [primary key]
+  username varchar [unique]
+  roles varchar
+  password varchar
+  created_at timestamp
+}
+
+Table characters {
+  id integer [primary key]
+  name varchar
+  description text
+  user_id integer [not null, ref: > users.id]
+  campaign_id integer [not null, ref: > campaigns.id]
+  status varchar
+  created_at timestamp
+  link varchar
+}
+
+Table items {
+  id integer [primary key]
+  author integer [not null]
+  character_id integer [not null, ref: > characters.id]
+  campaign_id integer [not null, ref: > campaigns.id]
+  title varchar
+  description text
+  link varchar
+  icon_id integer [ref: - media.id]
+  card_id integer [ref: - media.id]
+}
+
+Table campaigns {
+  id integer [primary key]
+  user_id integer [not null, ref: > users.id]
+  title varchar
+  description text
+}
+
+Table campaign_role {
+  user_id integer [not null, ref: - users.id]
+  campaign_id integer [not null, ref: > campaigns.id]
+  role varchar
+
+  indexes {
+    (user_id, campaign_id) [pk]
+  }
+}
+
+Table campaign_invites {
+  id integer [primary key]
+  sender integer [not null, ref: > users.id]
+  recipient integer [not null, ref: > users.id]
+  campaign_id integer [not null, ref: > campaigns.id]
+  created_at timestamp
+}
+
+Table campaign_events {
+  id integer [primary key]
+  event_type integer [default: 0]
+  campaign_id integer [not null, ref: > campaigns.id]
+  character_id integer [ref: > characters.id]
+  title varchar
+  description varchar
+  media_id integer [ref: - media.id]
+  comment_count integer
+}
+
+Table campaign_event_comments {
+  id integer [primary key]
+  event_id integer [not null, ref: > campaign_events.id]
+  content varchar
+  user_id integer [not null, ref: > users.id]
+  character_id integer [ref: > characters.id]
+  as_character bool [default: false]
+  media_id integer [ref: - media.id]
+}
+
+Table media {
+  id integer [primary key]
+  media_type integer
+  size integer
+  mime_type varchar
+  extension varchar
+  filename varchar
+  path varchar
+}

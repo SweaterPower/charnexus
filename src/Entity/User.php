@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use App\Entity\CampaignInvite;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -33,6 +36,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    /**
+     * @var Collection<int, Campaign>
+     */
+    #[ORM\OneToMany(targetEntity: Campaign::class, mappedBy: 'userId', orphanRemoval: true)]
+    private Collection $campaigns;
+
+    /**
+     * @var Collection<int, Character>
+     */
+    #[ORM\OneToMany(targetEntity: Character::class, mappedBy: 'user_id', orphanRemoval: true)]
+    private Collection $characters;
+
+    /**
+     * @var Collection<int, CampaignInvite>
+     */
+    #[ORM\OneToMany(targetEntity: CampaignInvite::class, mappedBy: 'sender', orphanRemoval: true)]
+    private Collection $sentInvites;
+
+    /**
+     * @var Collection<int, CampaignInvite>
+     */
+    #[ORM\OneToMany(targetEntity: CampaignInvite::class, mappedBy: 'recipient', orphanRemoval: true)]
+    private Collection $receivedInvites;
+
+    public function __construct()
+    {
+        $this->campaigns = new ArrayCollection();
+        $this->characters = new ArrayCollection();
+        $this->sentInvites = new ArrayCollection();
+        $this->receivedInvites = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -107,5 +142,125 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
         return $data;
+    }
+
+    /**
+     * @return Collection<int, Campaign>
+     */
+    public function getCampaigns(): Collection
+    {
+        return $this->campaigns;
+    }
+
+    public function addCampaign(Campaign $campaign): static
+    {
+        if (!$this->campaigns->contains($campaign)) {
+            $this->campaigns->add($campaign);
+            $campaign->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampaign(Campaign $campaign): static
+    {
+        if ($this->campaigns->removeElement($campaign)) {
+            // set the owning side to null (unless already changed)
+            if ($campaign->getUserId() === $this) {
+                $campaign->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Character>
+     */
+    public function getCharacters(): Collection
+    {
+        return $this->characters;
+    }
+
+    public function addCharacter(Character $character): static
+    {
+        if (!$this->characters->contains($character)) {
+            $this->characters->add($character);
+            $character->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCharacter(Character $character): static
+    {
+        if ($this->characters->removeElement($character)) {
+            // set the owning side to null (unless already changed)
+            if ($character->getUser() === $this) {
+                $character->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CampaignInvite>
+     */
+    public function getSentInvites(): Collection
+    {
+        return $this->sentInvites;
+    }
+
+    public function addSentInvite(CampaignInvite $sentInvite): static
+    {
+        if (!$this->sentInvites->contains($sentInvite)) {
+            $this->sentInvites->add($sentInvite);
+            $sentInvite->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentInvite(CampaignInvite $sentInvite): static
+    {
+        if ($this->sentInvites->removeElement($sentInvite)) {
+            // set the owning side to null (unless already changed)
+            if ($sentInvite->getSender() === $this) {
+                $sentInvite->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CampaignInvite>
+     */
+    public function getReceivedInvites(): Collection
+    {
+        return $this->receivedInvites;
+    }
+
+    public function addReceivedInvite(CampaignInvite $receivedInvite): static
+    {
+        if (!$this->receivedInvites->contains($receivedInvite)) {
+            $this->receivedInvites->add($receivedInvite);
+            $receivedInvite->setRecipient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecievedInvite(CampaignInvite $receivedInvite): static
+    {
+        if ($this->receivedInvites->removeElement($receivedInvite)) {
+            // set the owning side to null (unless already changed)
+            if ($receivedInvite->getRecipient() === $this) {
+                $receivedInvite->setRecipient(null);
+            }
+        }
+
+        return $this;
     }
 }
