@@ -23,7 +23,7 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
-                default_target_path: profile/overview
+                default_target_path: profile_overview
                 always_use_default_target_path: true
             logout:
                 path: app_logout
@@ -40,6 +40,13 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/character, roles: ROLE_USER }
+        - { path: ^/campaign, roles: ROLE_USER }
+
+        - { path: ^/, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: ROLE_USER }
 
 when@test:
     security:
