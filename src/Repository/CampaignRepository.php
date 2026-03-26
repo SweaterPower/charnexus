@@ -2,8 +2,8 @@
 
 namespace App\Repository;
 
+use App\Dictionary\CampaignRoleDictionary;
 use App\Entity\Campaign;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,11 +21,11 @@ class CampaignRepository extends ServiceEntityRepository
     /**
     * @return Campaign[]
     */
-    public function findByAuthor(User $user): array
+    public function findByAuthor(int $userId): array
     {
         return $this->createQueryBuilder('c')
             ->andWhere('c.user = :val')
-            ->setParameter('val', $user->getId())
+            ->setParameter('val', $userId)
             ->getQuery()
             ->getResult();
     }
@@ -33,38 +33,15 @@ class CampaignRepository extends ServiceEntityRepository
     /**
     * @return Campaign[]
     */
-    public function findByUserCharacter(User $user): array
+    public function findByUserCharacter(int $userId): array
     {
         return $this->createQueryBuilder('c')
-            ->leftJoin('c.characters', 'char', Join::ON, 'char.company_id = c.id')
-            ->andWhere('char.user = :val')
-            ->setParameter('val', $user->getId())
+            ->leftJoin('c.roles', 'r', Join::ON, 'r.company_id = c.id AND r.user_id = :userId')
+            ->andWhere('r.type != :roleGM AND r.type != :roleBlocked')
+            ->setParameter('userId', $userId)
+            ->setParameter('roleGM', CampaignRoleDictionary::ROLE_GAME_MASTER)
+            ->setParameter('roleBlocked', CampaignRoleDictionary::ROLE_BLOCKED)
             ->getQuery()
             ->getResult();
     }
-
-    //    /**
-    //     * @return Campaign[] Returns an array of Campaign objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Campaign
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

@@ -16,28 +16,14 @@ class CampaignRoleRepository extends ServiceEntityRepository
         parent::__construct($registry, CampaignRole::class);
     }
 
-    //    /**
-    //     * @return CampaignRole[] Returns an array of CampaignRole objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?CampaignRole
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneById(int $userId, int $campaignId): ?CampaignRole
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.user = :userId')
+            ->andWhere('r.campaign = :campaignId')
+            ->setParameter('userId', $userId)
+            ->setParameter('campaignId', $campaignId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -6,12 +6,14 @@ use App\Entity\Campaign;
 use App\Entity\User;
 use App\Form\CampaignType;
 use App\Repository\CampaignRepository;
+use App\Security\Voter\CampaignVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/campaign')]
 final class CampaignController extends AbstractController
@@ -20,8 +22,8 @@ final class CampaignController extends AbstractController
     public function index(CampaignRepository $campaignRepository, #[CurrentUser] User $user): Response
     {
         return $this->render('campaign/index.html.twig', [
-            'myCampaigns' => $campaignRepository->findAll(),
-            'campaigns' => $campaignRepository->findBy(['user' => $user])
+            'myCampaigns' => $campaignRepository->findByAuthor($user->getId()),
+            'campaigns' => $campaignRepository->findByUserCharacter($user->getId())
         ]);
     }
 
@@ -46,6 +48,7 @@ final class CampaignController extends AbstractController
     }
 
     #[Route('/{campaign}', name: 'app_campaign_show', methods: ['GET'])]
+    #[IsGranted(CampaignVoter::VIEW, 'campaign')]
     public function show(Campaign $campaign): Response
     {
         return $this->render('campaign/show.html.twig', [
@@ -54,6 +57,7 @@ final class CampaignController extends AbstractController
     }
 
     #[Route('/{campaign}/edit', name: 'app_campaign_edit', methods: ['GET', 'POST'])]
+    #[IsGranted(CampaignVoter::EDIT, 'campaign')]
     public function edit(Request $request, Campaign $campaign, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(CampaignType::class, $campaign);
@@ -65,13 +69,14 @@ final class CampaignController extends AbstractController
             return $this->redirectToRoute('app_campaign_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('campaign/edit.html.twig', [
+        return $this->render('campaign/edit.html.twig',  [
             'campaign' => $campaign,
             'form' => $form,
         ]);
     }
 
     #[Route('/{campaign}', name: 'app_campaign_delete', methods: ['POST'])]
+    #[IsGranted(CampaignVoter::DELETE, 'campaign')]
     public function delete(Request $request, Campaign $campaign, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$campaign->getId(), $request->getPayload()->getString('_token'))) {
