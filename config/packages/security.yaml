@@ -25,6 +25,7 @@ security:
                 enable_csrf: true
                 default_target_path: profile_overview
                 always_use_default_target_path: true
+            entry_point: form_login
             logout:
                 path: app_logout
                 # where to redirect after logout

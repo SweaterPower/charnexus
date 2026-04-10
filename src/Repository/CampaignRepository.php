@@ -5,7 +5,6 @@ namespace App\Repository;
 use App\Dictionary\CampaignRoleDictionary;
 use App\Entity\Campaign;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -36,8 +35,8 @@ class CampaignRepository extends ServiceEntityRepository
     public function findByUserCharacter(int $userId): array
     {
         return $this->createQueryBuilder('c')
-            ->leftJoin('c.roles', 'r', Join::ON, 'r.company_id = c.id AND r.user_id = :userId')
-            ->andWhere('r.type != :roleGM AND r.type != :roleBlocked')
+            ->leftJoin('c.roles', 'r', 'WITH', 'r.campaign = c.id AND r.user = :userId')
+            ->andWhere('r.role != :roleGM AND r.role != :roleBlocked')
             ->setParameter('userId', $userId)
             ->setParameter('roleGM', CampaignRoleDictionary::ROLE_GAME_MASTER)
             ->setParameter('roleBlocked', CampaignRoleDictionary::ROLE_BLOCKED)
