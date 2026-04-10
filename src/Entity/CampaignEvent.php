@@ -5,10 +5,8 @@ namespace App\Entity;
 use App\Repository\CampaignEventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: CampaignEventRepository::class)]
-#[Broadcast]
 class CampaignEvent
 {
     #[ORM\Id]
